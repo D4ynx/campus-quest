@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import api from '../services/api'
 
 function Login() {
@@ -36,6 +37,7 @@ function Login() {
         placeholder="Password"
       />
       <button type="submit">Log In</button>
+      <p> Don't have an account? <Link to="/register"> Sign up </Link></p>
     </form>
   )
 }
