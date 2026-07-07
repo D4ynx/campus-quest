@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" })
+  const navigate = useNavigate()
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -14,7 +15,8 @@ function Login() {
     try {
       const res = await api.post("/auth/login", formData)
       localStorage.setItem("token", res.data.token)
-      console.log("Logged in, token stored")
+      navigate("/dashboard")
+
     } catch (err) {
       console.error("Login failed", err)
     }
