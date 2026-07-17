@@ -47,8 +47,19 @@ function Dashboard() {
             console.error("Failed to update status", err)
         }
     }
-        
+
+    async function handleDeleteQuest(quest: Quest){
+        // if button is activated... then scan for the quest_id and delete it from the databse
+        try {
+            await api.delete(`/quests/${quest.quest_id}`)
+            setQuests(quests.filter((q) => q.quest_id !== quest.quest_id))
+        } catch (err) {
+            console.error("Failed to delete quest", err)
+        }
+    }
+
         return (
+
             <div>
                 <h1>My Quests</h1>
                 <form onSubmit={handleCreateQuest}>
@@ -63,6 +74,7 @@ function Dashboard() {
                         <li key={quest.quest_id}>
                             {quest.quest_name} - {quest.quest_status} - {quest.xp_earned} XP
                             <button onClick={() => handleToggleStatus(quest)}>Toggle Status</button>
+                            <button onClick={() => handleDeleteQuest(quest)}>Delete Quest</button>
                         </li>
                     ))}
                 </ul>
