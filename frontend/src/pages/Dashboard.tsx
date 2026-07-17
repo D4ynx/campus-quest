@@ -10,6 +10,13 @@ function Dashboard() {
         xp_earned: "",
         quest_deadline: "",
     })
+    const [editingId, setEditingId] = useState<number | null>(null)
+    const [editQuest, setEditQuest] = useState({
+        quest_name: "",
+        quest_description: "",
+        xp_earned: "",
+        quest_deadline: "",
+    })
 
     useEffect(() => {
         api.get("/quests").then((res) => setQuests(res.data))
@@ -58,6 +65,34 @@ function Dashboard() {
         }
     }
 
+    function handleEditClick(quest: Quest){
+        setEditingId(quest.quest_id)
+        setEditQuest({
+            quest_name: quest.quest_name,
+            quest_description: quest.quest_description,
+            xp_earned: String(quest.xp_earned),
+            quest_deadline: quest.quest_deadline
+        })
+    }
+
+    function handleEditQuestChange(e: React.ChangeEvent<HTMLInputElement>){
+        setEditQuest({ ...editQuest, [e.target.name]: e.target.value })
+    }
+    
+    async function handleUpdateQuest(e: React.FormEvent){
+        e.preventDefault()
+        try {
+            const res = await api.put(`/quests/${editingId}`, {
+                ...editQuest,
+                xp_earned: Number(editQuest.xp_earned),
+            })
+            setQuests(quests.map((q) => (q.quest_id === editingId ? res.data : q)))
+            setEditingId(null)
+        } catch (err) {
+            console.error("Failed to update quest", err)
+        }
+    }
+
         return (
 
             <div>
@@ -71,11 +106,25 @@ function Dashboard() {
                 </form>
                 <ul>
                     {quests.map((quest) => (
-                        <li key={quest.quest_id}>
-                            {quest.quest_name} - {quest.quest_status} - {quest.xp_earned} XP
-                            <button onClick={() => handleToggleStatus(quest)}>Toggle Status</button>
-                            <button onClick={() => handleDeleteQuest(quest)}>Delete Quest</button>
-                        </li>
+                        quest.quest_id === editingId ? (
+                            <div>
+                                <form onSubmit={handleUpdateQuest}>
+                                    <input name="quest_name" type="text" value={editQuest.quest_name} onChange={handleEditQuestChange} />
+                                    <input name="quest_description" type="text" value={editQuest.quest_description} onChange={handleEditQuestChange} />
+                                    <input name="xp_earned" type="number" value={editQuest.xp_earned} onChange={handleEditQuestChange} />
+                                    <input name="quest_deadline" type="date" value={editQuest.quest_deadline} onChange={handleEditQuestChange} />
+                                    <button type="submit">Update Quest</button>
+                                    <button type= "button" onClick={() => setEditingId(null)}>Cancel Edit</button>
+                                </form>
+                            </div>
+                        ) : (
+                            <li key={quest.quest_id}>
+                                {quest.quest_name} - {quest.quest_status} - {quest.xp_earned} XP
+                                <button onClick={() => handleToggleStatus(quest)}>Toggle Status</button>
+                                <button onClick={() => handleDeleteQuest(quest)}>Delete Quest</button>
+                                <button onClick={() => handleEditClick(quest)}>Edit Quest</button>
+                            </li>
+                        )
                     ))}
                 </ul>
             </div>
